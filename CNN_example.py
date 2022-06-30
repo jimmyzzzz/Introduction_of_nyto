@@ -8,7 +8,7 @@
 	2.2. 開始訓練
 	2.3. 測試在測試資料集上的表現
 3. 保存模型
-	3.1. 移除批節點和資料節點
+	3.1. 移除批節點
 	3.2. 保存
 '''
 
@@ -46,9 +46,6 @@ from nyto import layer
 from nyto import unit_function as uf
 
 (nn,n)=to.new_net(
-    train_x=to.add_data(train_img),
-    train_y=to.add_data(train_label),
-    
     conv1=layer.new_conv_layer((1,6), pad_mod='same'),
     conv2=layer.new_conv_layer((6,36), pad_mod='same', kernal_size=(5,5)),
     
@@ -69,7 +66,7 @@ n.accuracy=uf.accuracy(n.pre, n.data_label)
 nlist=to.batch_launcher(
     nn=nn,
     get={n.pre,n.loss,n.accuracy},
-    batch_push={'data_input':n.train_x, 'data_label':n.train_y},
+    batch_push={'data_input':train_img, 'data_label':train_label},
     batch_size=100
 )
 
@@ -134,11 +131,9 @@ print(f"test: loss={test_performance['loss']} acc={test_performance['accuracy']}
 
 ######################### 3. 保存模型 ##############################
 
-# 3.1. 移除批節點和資料節點
+# 3.1. 移除批節點
 
 remove_id_set=to.free_unused_nodes(best_net, {'loss', 'accuracy'})
-best_net.unit.remove('train_x')
-best_net.unit.remove('train_y')
 
 # 3.2. 保存
 
